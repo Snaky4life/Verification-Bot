@@ -1,0 +1,127 @@
+From 694e28ecd37b5dd7e0a5c0d25eda9f0fa2585f19 Mon Sep 17 00:00:00 2001
+From: timelessnesses <mooping3roblox@gmail.com>
+Date: Sat, 16 Apr 2022 09:54:37 +0700
+Subject: [PATCH] on_ready checks
+
+---
+ Cogs/verify.py | 56 +++++++++++++++++++++++++++++++++++++-------------
+ DB/recent.txt  |  1 +
+ 2 files changed, 43 insertions(+), 14 deletions(-)
+ create mode 100644 DB/recent.txt
+
+diff --git a/Cogs/verify.py b/Cogs/verify.py
+index 3487050..ae3d5c4 100644
+--- a/Cogs/verify.py
++++ b/Cogs/verify.py
+@@ -8,15 +8,19 @@ class VerifyUI(discord.ui.View):
+     def __init__(self):
+         super().__init__(timeout=None)
+ 
+-    @discord.ui.button(label="Verify", emoji="<a:Yes_DLC:833322133648179201>", style=discord.ButtonStyle.blurple)
++    @discord.ui.button(
++        label="Verify",
++        emoji="<a:Yes_DLC:833322133648179201>",
++        style=discord.ButtonStyle.blurple,
++    )
+     async def verify(self, ctx: discord.Interaction, button: discord.ui.Button):
+         if ctx.guild.get_role(825355424836354066) in ctx.user.roles:
+             await ctx.response.send_message(
+                 embed=discord.Embed(
+                     title="",
+-                    description="<a:No_DLC:833322134050177024> Unable to verify | You are currently muted in the server"
++                    description="<a:No_DLC:833322134050177024> Unable to verify | You are currently muted in the server",
+                 ),
+-                ephemeral=False
++                ephemeral=False,
+             )
+         if not ctx.guild.get_role(825355424827310090) in ctx.user.roles:
+             await ctx.response.send_message(
+@@ -24,8 +28,8 @@ async def verify(self, ctx: discord.Interaction, button: discord.ui.Button):
+                     title="",
+                     description="<a:Yes_DLC:833322133648179201> Added the role `Verified`",
+                     color=discord.Color.green(),
+-                )
+-                ,ephemeral=True
++                ),
++                ephemeral=True,
+             )
+             await ctx.user.add_roles(ctx.guild.get_role(825355424827310090))
+             return
+@@ -35,25 +39,47 @@ async def verify(self, ctx: discord.Interaction, button: discord.ui.Button):
+                     title="",
+                     description="<:Info_DLC:859281354519478302> No changes has been made | You have already been verified.",
+                 ),
+-                ephemeral=True
++                ephemeral=True,
+             )
+             return
+ 
+ 
+ class verify(commands.Cog):
+-    def __init__(self, bot):
+-        self.bot = bot
++    def __init__(self, bot: commands.Bot):
++        self.bot: commands.Bot = bot
++
++    @commands.Cog.listener()
++    async def on_ready(self):
++        with open("./DB/recent.txt") as f:
++            recent = f.read()
++        channel = self.bot.get_channel(825355425485815850)
++        message = await channel.get_message(int(recent))
++        await message.delete()
++        embed = discord.Embed(
++            title="Verification",
++            description="By pressing the button below this message, You agree to be pinged by anyone in this server and you agree to abide by ALL of the laws above. Additionally, You also agree to be sent a friend request by Fasty when you leave the server and a DM If you accept it.\n\nhttps://discord.gg/8bedEJyaCu = Our Invite Link\n\nPlease DM DLC ModMail For any inquires, questions or if you would like to gain your roles back from the old DLC.\n\nPlease enjoy your stay in the DLC. \n- Moderation Team",
++            color=0x00FFFF,
++        )
++
++        embed.set_author(name="Discord Leisure Centre")
++        embed.set_footer(text="Formality Is Professionality")
++        view = VerifyUI()
++        message = await channel.send(embed=embed, view=view)
++        with open("./DB/recent.txt", "w") as f:
++            f.write(str(message.id))
+ 
+     @commands.command()
+-    async def verifymessage(self, ctx: commands.Context, channel: discord.TextChannel = None):
++    async def verifymessage(
++        self, ctx: commands.Context, channel: discord.TextChannel = None
++    ):
+         if channel is None:
+             channel = ctx.channel
+         embed = discord.Embed(
+             title="Verification",
+             description="By pressing the button below this message, You agree to be pinged by anyone in this server and you agree to abide by ALL of the laws above. Additionally, You also agree to be sent a friend request by Fasty when you leave the server and a DM If you accept it.\n\nhttps://discord.gg/8bedEJyaCu = Our Invite Link\n\nPlease DM DLC ModMail For any inquires, questions or if you would like to gain your roles back from the old DLC.\n\nPlease enjoy your stay in the DLC. \n- Moderation Team",
+             color=0x00FFFF,
+-        ) 
+-        
++        )
++
+         embed.set_author(name="Discord Leisure Centre")
+         embed.set_footer(text="Formality Is Professionality")
+         view = VerifyUI()
+@@ -61,10 +87,12 @@ async def verifymessage(self, ctx: commands.Context, channel: discord.TextChanne
+ 
+     @commands.command()
+     @commands.has_role(825355424836354058)
+-    async def verify(self, ctx, member:discord.Member):
+-        verify = discord.utils.get(ctx.guild.roles, name = "Verified")
++    async def verify(self, ctx, member: discord.Member):
++        verify = discord.utils.get(ctx.guild.roles, name="Verified")
+         await member.add_roles(verify)
+-        await ctx.send(f"Sucessfully verified the user: `{member.name}#{member.discriminator}`")
++        await ctx.send(
++            f"Sucessfully verified the user: `{member.name}#{member.discriminator}`"
++        )
+ 
+ 
+ async def setup(bot):
+diff --git a/DB/recent.txt b/DB/recent.txt
+new file mode 100644
+index 0000000..c45d0cc
+--- /dev/null
++++ b/DB/recent.txt
+@@ -0,0 +1 @@
++964630297578721301
+\ No newline at end of file
