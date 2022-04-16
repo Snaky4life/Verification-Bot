@@ -18,7 +18,7 @@ class VerifyUI(discord.ui.View):
                     title="",
                     description="<a:No_DLC:833322134050177024> Unable to verify | You are currently muted in the server",
                 ),
-                ephemeral=False,
+                ephemeral=True,
             )
         if not ctx.guild.get_role(825355424827310090) in ctx.user.roles:
             await ctx.response.send_message(
@@ -29,7 +29,7 @@ class VerifyUI(discord.ui.View):
                 ),
                 ephemeral=True,
             )
-            await ctx.user.add_roles(ctx.guild.get_role(825355424827310090))
+            await ctx.user.add_roles(ctx.guild.get_role(825355424827310090)) 
             return
         else:
             await ctx.response.send_message(
@@ -48,10 +48,11 @@ class verify(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        print("called")
         with open("./DB/recent.txt") as f:
             recent = f.read()
         channel = self.bot.get_channel(825355425485815850)
-        message = await channel.get_message(int(recent))
+        message = await channel.fetch_message(int(recent))
         await message.delete()
         embed = discord.Embed(
             title="Verification",
@@ -66,9 +67,6 @@ class verify(commands.Cog):
         with open("./DB/recent.txt", "w") as f:
             f.write(str(message.id))
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        guild = self.bot
     
     @commands.command()
     async def verifymessage(
