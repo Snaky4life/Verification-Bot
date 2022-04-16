@@ -1,7 +1,5 @@
 import discord
 from discord.ext import commands
-from discord.ext.commands import MissingPermissions
-import asyncio
 
 
 class VerifyUI(discord.ui.View):
@@ -44,6 +42,10 @@ class verify(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+        guild = self.bot
+    
     @commands.command()
     async def verifymessage(self, ctx: commands.Context, channel: discord.TextChannel = None):
         if channel is None:
